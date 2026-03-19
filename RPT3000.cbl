@@ -102,13 +102,13 @@
            05  FILLER PIC X(52) VALUE SPACE.
 
        01  HEADING-LINE-4.
-           05  FILLER PIC X(8)  VALUE "NUM    ".
+           05  FILLER PIC X(20) VALUE "NUM    REP   NUM".
            05  FILLER PIC X(23) VALUE "CUSTOMER NAME          ".
            05  FILLER PIC X(14) VALUE "THIS YTD      ".
            05  FILLER PIC X(14) VALUE "LAST YTD      ".
            05  FILLER PIC X(13) VALUE "AMOUNT       ".
            05  FILLER PIC X(7)  VALUE "PERCENT".
-           05  FILLER PIC X(44) VALUE SPACE.
+           05  FILLER PIC X(39) VALUE SPACE.
 
        01  HEADING-LINE-5.
            05  FILLER PIC X(6)  VALUE ALL "-".
@@ -129,9 +129,8 @@
            05  FILLER PIC X(39) VALUE SPACE.
 
        01  CUSTOMER-LINE.
-           05  FILLER              PIC X(2)    VALUE SPACE.
-           05  CL-BRANCH-NUMBER    PIC X(2).
-           05  FILLER              PIC X(4)    VALUE SPACE.
+           05  CL-BRANCH-NUMBER    PIC 9(2).
+           05  FILLER              PIC X(5)    VALUE SPACE.
            05  CL-SALESREP-NUMBER  PIC 9(2).
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CUSTOMER-NUMBER  PIC 9(5).
@@ -145,12 +144,23 @@
            05  CL-CHANGE-AMOUNT    PIC ZZ,ZZ9.99-.
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CHANGE-PERCENT   PIC ZZ9.9-.
-           05  FILLER              PIC X(47)   VALUE SPACE.
+           05  FILLER              PIC X(37)   VALUE SPACE.
 
-       01  BRANCH_TOTAL_LINE.
+       01  BRANCH-TOTAL-LINE.
+           05  FILLER              PIC X(23)   VALUE SPACE.
+           05  FILLER              PIC X(14)   VALUE "BRANCH TOTAL".
+           05  BTL-SALES-THIS-YTD  PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-SALES-LAST-YTD  PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-CHANGE-AMOUNT   PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-CHANGE-PERCENT  PIC ZZ9.9-.
+           05  FILLER              PIC X(47)   VALUE " *".
 
        01  GRAND-TOTAL-LINE-1.
-           05  FILLER              PIC X(43)   VALUE SPACE.
+           05  FILLER              PIC X(23)   VALUE SPACE.
+           05  FILLER              PIC X(12)   VALUE "GRAND TOTAL".
            05  FILLER              PIC X(10)   VALUE ALL "=".
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  FILLER              PIC X(10)   VALUE ALL "=".
@@ -158,7 +168,7 @@
            05  FILLER              PIC X(10)   VALUE ALL "=".
            05  FILLER              PIC X(3)    VALUE SPACE.
            05  FILLER              PIC X(7)    VALUE ALL "=".
-           05  FILLER              PIC X(39)   VALUE SPACE.
+           05  FILLER              PIC X(47)   VALUE " **".
 
        01  GRAND-TOTAL-LINE-2.
            05  FILLER              PIC X(41)   VALUE SPACE.
