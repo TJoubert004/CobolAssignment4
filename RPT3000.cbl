@@ -1,17 +1,16 @@
        IDENTIFICATION DIVISION.
 
-       PROGRAM-ID. RPT3000.
+       PROGRAM-ID. RPT2000.
       *****************************************************************
       *  Programmers: Tristan Joubert Clay Rasmussen
       *  Date.......: February 19, 2025
       *  GitHub URL.: https://github.com/TJoubert004/CobolAssignment3
-      *  Description: The RPT3000 program is an enhanced COBOL
+      *  Description: The RPT2000 program is an enhanced COBOL
       *               reporting tool. It serves as a data processing
       *               utility that reads customer financial records
       *               from a master input file (CUSTMAST) and
       *               generates a formatted, multi-columnar
-      *               Year-To-Date (YTD) Sales Report. This version 
-      *               also displays the branch totals.
+      *               Year-To-Date (YTD) Sales Report.
       *****************************************************************
        ENVIRONMENT DIVISION.
 
@@ -19,7 +18,7 @@
 
        FILE-CONTROL.
            SELECT CUSTMAST ASSIGN TO CUSTMAST.
-           SELECT OUTPUT-RPT3000 ASSIGN TO RPT3000.
+           SELECT OUTPUT-RPT2000 ASSIGN TO RPT2000.
 
        DATA DIVISION.
        FILE SECTION.
@@ -37,7 +36,7 @@
            05  CM-SALES-LAST-YTD       PIC S9(5)V9(2).
            05  FILLER                  PIC X(87).
 
-       FD  OUTPUT-RPT3000
+       FD  OUTPUT-RPT2000
            RECORDING MODE IS F
            LABEL RECORDS ARE STANDARD
            RECORD CONTAINS 130 CHARACTERS
@@ -47,6 +46,10 @@
        WORKING-STORAGE SECTION.
        01  SWITCHES.
            05  CUSTMAST-EOF-SWITCH     PIC X    VALUE "N".
+           05  FIRTS-RECORD-SWITCH     PIC X    VALUE "Y".
+
+       01  CONTROL-FIELDS.
+           05 OLD-BRANCH-NUMBER        PIC 99.
 
        01  PRINT-FIELDS.
            05  PAGE-COUNT      PIC S9(3)   VALUE ZERO.
@@ -55,6 +58,8 @@
            05  SPACE-CONTROL   PIC S9.
 
        01  TOTAL-FIELDS.
+           05  BRANCH-TOTAL-THIS-YTD  PIC S9(6)V99   VALUE ZERO.
+           05  BRANCH-TOTAL-LAST-YTD  PIC S9(6)V99   VALUE ZERO.
            05  GRAND-TOTAL-THIS-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-LAST-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-CHANGE-AMT PIC S9(7)V99   VALUE ZERO.
@@ -91,16 +96,17 @@
            05  FILLER          PIC X(1)    VALUE ":".
            05  HL2-MINUTES     PIC 9(2).
            05  FILLER          PIC X(57)   VALUE SPACE.
-           05  FILLER          PIC X(10)   VALUE "RPT3000".
+           05  FILLER          PIC X(10)   VALUE "RPT2000".
            05  FILLER          PIC X(45)   VALUE SPACE.
 
        01  HEADING-LINE-3.
+           05  FILLER PIC X(8)  VALUE "BRANCH  ".
            05  FILLER PIC X(20) VALUE "BRANCH SALES CUST   ".
            05  FILLER PIC X(23) VALUE "SALES                  ".
            05  FILLER PIC X(14) VALUE "SALES    ".
            05  FILLER PIC X(14) VALUE "CHANGE        ".
            05  FILLER PIC X(7)  VALUE "CHANGE ".
-           05  FILLER PIC X(52) VALUE SPACE.
+           05  FILLER PIC X(44) VALUE SPACE.
 
        01  HEADING-LINE-4.
            05  FILLER PIC X(20) VALUE "NUM    REP   NUM".
@@ -172,13 +178,13 @@
        PROCEDURE DIVISION.
        000-PREPARE-SALES-REPORT.
            OPEN INPUT  CUSTMAST
-                OUTPUT OUTPUT-RPT3000.
+                OUTPUT OUTPUT-RPT2000.
            PERFORM 100-FORMAT-REPORT-HEADING.
            PERFORM 200-PREPARE-SALES-LINES
                UNTIL CUSTMAST-EOF-SWITCH = "Y".
            PERFORM 300-PRINT-GRAND-TOTALS.
            CLOSE CUSTMAST
-                 OUTPUT-RPT3000.
+                 OUTPUT-RPT2000.
            STOP RUN.
 
        100-FORMAT-REPORT-HEADING.
