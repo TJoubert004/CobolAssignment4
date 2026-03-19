@@ -1,16 +1,17 @@
        IDENTIFICATION DIVISION.
 
-       PROGRAM-ID. RPT2000.
+       PROGRAM-ID. RPT3000.
       *****************************************************************
-      *  Programmers: Tristan Joubert Clay Rasmussen
-      *  Date.......: February 19, 2025
-      *  GitHub URL.: https://github.com/TJoubert004/CobolAssignment3
-      *  Description: The RPT2000 program is an enhanced COBOL
+      *  Programmers: Tristan Joubert
+      *  Date.......: 19 March 2025
+      *  GitHub URL.: https://github.com/TJoubert004/CobolAssignment4
+      *  Description: The RPT3000 program is an enhanced COBOL
       *               reporting tool. It serves as a data processing
       *               utility that reads customer financial records
       *               from a master input file (CUSTMAST) and
       *               generates a formatted, multi-columnar
-      *               Year-To-Date (YTD) Sales Report.
+      *               Year-To-Date (YTD) Sales Report. This also shows
+      *               the branch totals
       *****************************************************************
        ENVIRONMENT DIVISION.
 
@@ -18,7 +19,7 @@
 
        FILE-CONTROL.
            SELECT CUSTMAST ASSIGN TO CUSTMAST.
-           SELECT OUTPUT-RPT2000 ASSIGN TO RPT2000.
+           SELECT OUTPUT-RPT3000 ASSIGN TO RPT3000.
 
        DATA DIVISION.
        FILE SECTION.
@@ -36,7 +37,7 @@
            05  CM-SALES-LAST-YTD       PIC S9(5)V9(2).
            05  FILLER                  PIC X(87).
 
-       FD  OUTPUT-RPT2000
+       FD  OUTPUT-RPT3000
            RECORDING MODE IS F
            LABEL RECORDS ARE STANDARD
            RECORD CONTAINS 130 CHARACTERS
@@ -46,6 +47,10 @@
        WORKING-STORAGE SECTION.
        01  SWITCHES.
            05  CUSTMAST-EOF-SWITCH     PIC X    VALUE "N".
+           05  FIRST-RECORD-SWITCH     PIC X    VALUE "Y".
+
+       01 CONTROL-FIELDS.
+           05 OLD-BRANCH-NUMBER        PIC 99.
 
        01  PRINT-FIELDS.
            05  PAGE-COUNT      PIC S9(3)   VALUE ZERO.
@@ -54,6 +59,8 @@
            05  SPACE-CONTROL   PIC S9.
 
        01  TOTAL-FIELDS.
+           05  BRANCH-TOTAL-THIS-YTD  PIC S9(6)V99   VALUE ZERO.
+           05  BRANCH-TOTAL-LAST-YTD  PIC S9(6)V99   VALUE ZERO.
            05  GRAND-TOTAL-THIS-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-LAST-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-CHANGE-AMT PIC S9(7)V99   VALUE ZERO.
@@ -90,25 +97,26 @@
            05  FILLER          PIC X(1)    VALUE ":".
            05  HL2-MINUTES     PIC 9(2).
            05  FILLER          PIC X(57)   VALUE SPACE.
-           05  FILLER          PIC X(10)   VALUE "RPT2000".
+           05  FILLER          PIC X(10)   VALUE "RPT3000".
            05  FILLER          PIC X(45)   VALUE SPACE.
 
        01  HEADING-LINE-3.
+           05  FILLER PIC X(8) VALUE "BRANCH  ".
            05  FILLER PIC X(20) VALUE "BRANCH SALES CUST   ".
            05  FILLER PIC X(23) VALUE "SALES                  ".
            05  FILLER PIC X(14) VALUE "SALES    ".
            05  FILLER PIC X(14) VALUE "CHANGE        ".
            05  FILLER PIC X(7)  VALUE "CHANGE ".
-           05  FILLER PIC X(52) VALUE SPACE.
+           05  FILLER PIC X(44) VALUE SPACE.
 
        01  HEADING-LINE-4.
-           05  FILLER PIC X(20) VALUE "NUM    REP   NUM".
+           05  FILLER PIC X(8) VALUE "NUM    ".
            05  FILLER PIC X(23) VALUE "CUSTOMER NAME          ".
            05  FILLER PIC X(14) VALUE "THIS YTD      ".
            05  FILLER PIC X(14) VALUE "LAST YTD      ".
            05  FILLER PIC X(13) VALUE "AMOUNT       ".
            05  FILLER PIC X(7)  VALUE "PERCENT".
-           05  FILLER PIC X(39) VALUE SPACE.
+           05  FILLER PIC X(44) VALUE SPACE.
 
        01  HEADING-LINE-5.
            05  FILLER PIC X(6)  VALUE ALL "-".
@@ -129,8 +137,9 @@
            05  FILLER PIC X(39) VALUE SPACE.
 
        01  CUSTOMER-LINE.
+           05  FILLER              PIC X(2)    VALUE SPACE.
            05  CL-BRANCH-NUMBER    PIC 9(2).
-           05  FILLER              PIC X(5)    VALUE SPACE.
+           05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-SALESREP-NUMBER  PIC 9(2).
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CUSTOMER-NUMBER  PIC 9(5).
@@ -144,7 +153,19 @@
            05  CL-CHANGE-AMOUNT    PIC ZZ,ZZ9.99-.
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CHANGE-PERCENT   PIC ZZ9.9-.
-           05  FILLER              PIC X(37)   VALUE SPACE.
+           05  FILLER              PIC X(47)   VALUE SPACE.
+
+       01  BRANCH-TOTAL-LINE.
+           05  FILLER              PIC X(23)   VALUE SPACE.
+           05  FILLER              PIC X(14)   VALUE "BRANCH TOTAL".
+           05  BTL-SALES-THIS-YTD  PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-SALES-LAST-YTD  PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-CHANGE-AMOUNT   PIC ZZZ,ZZ9.99-.
+           05  FILLER              PIC X(3)    VALUE SPACE.
+           05  BTL-CHANGE-PERCENT  PIC ZZ9.9-.
+           05  FILLER              PIC X(47)   VALUE " *".
 
        01  BRANCH-TOTAL-LINE.
            05  FILLER              PIC X(23)   VALUE SPACE.
@@ -184,13 +205,13 @@
        PROCEDURE DIVISION.
        000-PREPARE-SALES-REPORT.
            OPEN INPUT  CUSTMAST
-                OUTPUT OUTPUT-RPT2000.
+                OUTPUT OUTPUT-RPT3000.
            PERFORM 100-FORMAT-REPORT-HEADING.
-           PERFORM 200-PREPARE-SALES-LINES
+           PERFORM 300-PREPARE-SALES-LINES
                UNTIL CUSTMAST-EOF-SWITCH = "Y".
-           PERFORM 300-PRINT-GRAND-TOTALS.
+           PERFORM 500-PRINT-GRAND-TOTALS.
            CLOSE CUSTMAST
-                 OUTPUT-RPT2000.
+                 OUTPUT-RPT3000.
            STOP RUN.
 
        100-FORMAT-REPORT-HEADING.
@@ -201,21 +222,39 @@
            MOVE CD-HOURS   TO HL2-HOURS.
            MOVE CD-MINUTES TO HL2-MINUTES.
 
-       200-PREPARE-SALES-LINES.
-           PERFORM 210-READ-CUSTOMER-RECORD.
+       300-PREPARE-SALES-LINES.
+           PERFORM 310-READ-CUSTOMER-RECORD.
            IF CUSTMAST-EOF-SWITCH = "N"
-               PERFORM 220-PRINT-CUSTOMER-LINE.
+              IF FIRST-RECORD-SWITCH = "Y"
+                 PERFORM 320-PRINT-CUSTOMER-LINE 
+                 MOVE "N" TO FIRST-RECORD-SWITCH
+                 MOVE CM-BRANCH-NUMBER TO OLD-BRANCH-NUMBER
+              ELSE
+                 IF CM-BRANCH-NUMBER > OLD-BRANCH-NUMBER
+                    PERFORM 360-PRINT-BRANCH-LINE
+                    PERFORM 320-PRINT-CUSTOMER-LINE 
+                    MOVE CM-BRANCH-NUMBER TO OLD-BRANCH-NUMBER
+                 ELSE
+                    PERFORM 320-PRINT-CUSTOMER-LINE
+           ELSE
+              PERFORM 360-PRINT-BRANCH-LINE.
 
-       210-READ-CUSTOMER-RECORD.
+       310-READ-CUSTOMER-RECORD.
            READ CUSTMAST
                AT END
                    MOVE "Y" TO CUSTMAST-EOF-SWITCH.
 
-       220-PRINT-CUSTOMER-LINE.
+       320-PRINT-CUSTOMER-LINE.
            IF LINE-COUNT >= LINES-ON-PAGE
-               PERFORM 230-PRINT-HEADING-LINES.
+               PERFORM 330-PRINT-HEADING-LINES.
+           IF FIRST-RECORD-SWITCH = "Y"
+              MOVE CM-BRANCH-NUMBER TO CL-BRANCH-NUMBER 
+           ELSE
+              IF CM-BRANCH-NUMBER > OLD-BRANCH-NUMBER 
+                 MOVE CM-BRANCH-NUMBER TO CL-BRANCH-NUMBER 
+              ELSE 
+                 MOVE SPACE TO CL-BRANCH-NUMBER.
 
-           MOVE CM-BRANCH-NUMBER   TO CL-BRANCH-NUMBER.
            MOVE CM-SALESREP-NUMBER TO CL-SALESREP-NUMBER.
            MOVE CM-CUSTOMER-NUMBER TO CL-CUSTOMER-NUMBER.
            MOVE CM-CUSTOMER-NAME   TO CL-CUSTOMER-NAME.
@@ -235,16 +274,17 @@
            MOVE WS-CHANGE-PERCENT TO CL-CHANGE-PERCENT.
 
            MOVE CUSTOMER-LINE TO PRINT-AREA.
-           WRITE PRINT-AREA.
-           ADD 1 TO LINE-COUNT.
-
+           PERFORM 350-WRITE-REPORT-LINE.
+           MOVE 1 TO SPACE-CONTROL.
+           ADD CM-SALES-THIS-YTD TO BRANCH-TOTAL-THIS-YTD.
+           ADD CM-SALES-LAST-YTD TO BRANCH-TOTAL-LAST-YTD.
            ADD CM-SALES-THIS-YTD TO GRAND-TOTAL-THIS-YTD.
            ADD CM-SALES-LAST-YTD TO GRAND-TOTAL-LAST-YTD.
            ADD WS-CHANGE-AMOUNT  TO GRAND-TOTAL-CHANGE-AMT.
 
            MOVE 1 TO SPACE-CONTROL.
 
-       230-PRINT-HEADING-LINES.
+       330-PRINT-HEADING-LINES.
            ADD 1 TO PAGE-COUNT.
            MOVE PAGE-COUNT     TO HL1-PAGE-NUMBER.
            MOVE HEADING-LINE-1 TO PRINT-AREA.
@@ -259,7 +299,7 @@
            WRITE PRINT-AREA.
            MOVE ZERO TO LINE-COUNT.
 
-       300-PRINT-GRAND-TOTALS.
+       500-PRINT-GRAND-TOTALS.
            MOVE GRAND-TOTAL-LINE-1 TO PRINT-AREA.
            WRITE PRINT-AREA.
 
