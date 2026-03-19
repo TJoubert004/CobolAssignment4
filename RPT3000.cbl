@@ -46,10 +46,6 @@
        WORKING-STORAGE SECTION.
        01  SWITCHES.
            05  CUSTMAST-EOF-SWITCH     PIC X    VALUE "N".
-           05  FIRTS-RECORD-SWITCH     PIC X    VALUE "Y".
-
-       01  CONTROL-FIELDS.
-           05 OLD-BRANCH-NUMBER        PIC 99.
 
        01  PRINT-FIELDS.
            05  PAGE-COUNT      PIC S9(3)   VALUE ZERO.
@@ -58,8 +54,6 @@
            05  SPACE-CONTROL   PIC S9.
 
        01  TOTAL-FIELDS.
-           05  BRANCH-TOTAL-THIS-YTD  PIC S9(6)V99   VALUE ZERO.
-           05  BRANCH-TOTAL-LAST-YTD  PIC S9(6)V99   VALUE ZERO.
            05  GRAND-TOTAL-THIS-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-LAST-YTD   PIC S9(7)V99   VALUE ZERO.
            05  GRAND-TOTAL-CHANGE-AMT PIC S9(7)V99   VALUE ZERO.
@@ -100,22 +94,21 @@
            05  FILLER          PIC X(45)   VALUE SPACE.
 
        01  HEADING-LINE-3.
-           05  FILLER PIC X(8)  VALUE "BRANCH  ".
            05  FILLER PIC X(20) VALUE "BRANCH SALES CUST   ".
            05  FILLER PIC X(23) VALUE "SALES                  ".
            05  FILLER PIC X(14) VALUE "SALES    ".
            05  FILLER PIC X(14) VALUE "CHANGE        ".
            05  FILLER PIC X(7)  VALUE "CHANGE ".
-           05  FILLER PIC X(44) VALUE SPACE.
+           05  FILLER PIC X(52) VALUE SPACE.
 
        01  HEADING-LINE-4.
-           05  FILLER PIC X(20) VALUE "NUM    REP   NUM".
+           05  FILLER PIC X(8)  VALUE "NUM    ".
            05  FILLER PIC X(23) VALUE "CUSTOMER NAME          ".
            05  FILLER PIC X(14) VALUE "THIS YTD      ".
            05  FILLER PIC X(14) VALUE "LAST YTD      ".
            05  FILLER PIC X(13) VALUE "AMOUNT       ".
            05  FILLER PIC X(7)  VALUE "PERCENT".
-           05  FILLER PIC X(39) VALUE SPACE.
+           05  FILLER PIC X(44) VALUE SPACE.
 
        01  HEADING-LINE-5.
            05  FILLER PIC X(6)  VALUE ALL "-".
@@ -136,8 +129,9 @@
            05  FILLER PIC X(39) VALUE SPACE.
 
        01  CUSTOMER-LINE.
-           05  CL-BRANCH-NUMBER    PIC 9(2).
-           05  FILLER              PIC X(5)    VALUE SPACE.
+           05  FILLER              PIC X(2)    VALUE SPACE.
+           05  CL-BRANCH-NUMBER    PIC X(2).
+           05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-SALESREP-NUMBER  PIC 9(2).
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CUSTOMER-NUMBER  PIC 9(5).
@@ -151,7 +145,9 @@
            05  CL-CHANGE-AMOUNT    PIC ZZ,ZZ9.99-.
            05  FILLER              PIC X(4)    VALUE SPACE.
            05  CL-CHANGE-PERCENT   PIC ZZ9.9-.
-           05  FILLER              PIC X(37)   VALUE SPACE.
+           05  FILLER              PIC X(47)   VALUE SPACE.
+
+       01  BRANCH_TOTAL_LINE.
 
        01  GRAND-TOTAL-LINE-1.
            05  FILLER              PIC X(43)   VALUE SPACE.
