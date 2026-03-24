@@ -28,7 +28,7 @@ In this assignment, I implemented the following enterprise computing concepts:
 
 Below is a screenshot of the generated report showing the formatted customer lines, branch subtotals, and the final grand totals:
 
-![Program Output](assets/RPT3000_Output.png) 
+![Program Output](assests/RPT3000_Output.png) 
 
 ---
 
